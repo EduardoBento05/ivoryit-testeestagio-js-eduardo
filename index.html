@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <script src="js/campo-minado.js"></script>
+        <style>
+            body{
+              background-color: #fefefe
+            }
+  
+          </style>
+    </head>
+    <body>
+        <div id="exibir-execucao">
+        </div>
+
+        <script>
+            var campoMinado = new CampoMinado();
+            document.getElementById('exibir-execucao').innerHTML += '----------- Início do jogo -----------';
+            document.getElementById('exibir-execucao').innerHTML += '<pre>' + campoMinado.Tabuleiro() + '</pre>';
+
+            var bombas = [];
+            var naoBombas = [];
+            var jogoVencido = false;
+
+            while (!jogoVencido) {
+                campoMinado = new CampoMinado();
+
+                let tabuleiroString = campoMinado.Tabuleiro();
+                let tabuleiroLinhas = tabuleiroString.split("\r\n");
+                let tabuleiro = [];
+
+                tabuleiroLinhas.forEach(element => {
+                    let linha = Array.from(element);
+                    tabuleiro.push(linha);
+                });
+
+                var bombaEncontrada = false;
+                let parar = false;
+
+                for(let linha = 0; linha < tabuleiro.length; linha++) {
+                    for(let coluna = 0; coluna < tabuleiro[0].length; coluna++) {
+                        if (tabuleiro[linha][coluna] === "-") {
+                            let temUmaBomba = false;
+
+                            bombas.forEach(pos => {
+                                if (pos[0] === linha && pos[1] === coluna) {
+                                    temUmaBomba = true;
+                                }
+                            });
+
+                            if (!temUmaBomba) {
+                                campoMinado.Abrir(linha + 1, coluna + 1);
+                            }
+
+                            if (campoMinado.JogoStatus() === 0) {
+                                // jogo rodando
+                                if (!temUmaBomba) {
+                                    document.getElementById('exibir-execucao').innerHTML += '<pre>----------- Jogo em Aberto -----------</pre>';
+                                    naoBombas.push([linha, coluna]);
+                                }
+                            }
+                            else if (campoMinado.JogoStatus() === 1) {
+                                // vitória
+                                document.getElementById('exibir-execucao').innerHTML += '<pre>----------- Vitória -----------</pre>';
+                                parar = true;
+                                jogoVencido = true;
+                            }
+                            else if (campoMinado.JogoStatus() === 2) {
+                                // derrota
+                                document.getElementById('exibir-execucao').innerHTML += '<pre>----------- Game Over -----------</pre>';                                
+                                bombas.push([linha, coluna]);
+                                parar = true;
+                                bombaEncontrada = true;
+                                bombas.push([linha, coluna]);
+                                tabuleiro[linha][coluna] == "*";
+                            }
+                            else {
+                                break;
+                            }
+
+                            if (!temUmaBomba) {
+                                var t = campoMinado.Tabuleiro().split("\r\n");
+                                tabuleiro[linha][coluna] = t[linha][coluna];
+
+                                var linhas = [];
+                                tabuleiro.forEach(l => {linhas.push(l.join(""))});
+                                var tb = linhas.join("\r\n");
+
+                                document.getElementById('exibir-execucao').innerHTML += '<pre>' + tb + '</pre>';
+                                document.getElementById('exibir-execucao').innerHTML += `<pre>Abrindo casa: linha(${linha+1}) / coluna(${coluna+1})</pre>`;
+                            }
+
+                            if (parar) {
+                                if (bombaEncontrada) {
+                                    document.getElementById('exibir-execucao').innerHTML += `<pre>Bomba encontrada: linha(${linha+1}) / coluna(${coluna+1})</pre>`;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if (parar) {
+                        break;
+                    }
+                }
+            }
+
+        </script>
+    </body>
+</html>
